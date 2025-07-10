@@ -102,6 +102,22 @@ class GameScene extends Phaser.Scene {
     graphics.fillCircle(16, 16, 16);
     graphics.generateTexture('coin', 32, 32);
     graphics.clear();
+
+    // Power-up textures (placeholder visuals)
+    graphics.fillStyle(0x00bcd4, 1); // Cyan circle – Magnet
+    graphics.fillCircle(16, 16, 16);
+    graphics.generateTexture('power_magnet', 32, 32);
+    graphics.clear();
+
+    graphics.fillStyle(0x9c27b0, 1); // Purple rectangle – Jetpack
+    graphics.fillRect(0, 0, 32, 32);
+    graphics.generateTexture('power_jetpack', 32, 32);
+    graphics.clear();
+
+    graphics.fillStyle(0xff4081, 1); // Pink ellipse – Hoverboard
+    graphics.fillEllipse(16, 16, 32, 16);
+    graphics.generateTexture('power_hover', 32, 32);
+    graphics.clear();
   }
 
   create() {
@@ -112,6 +128,8 @@ class GameScene extends Phaser.Scene {
     this.JUMP_HEIGHT = 120;
     this.JUMP_DURATION = 600;
     this.ROLL_DURATION = 500;
+    this.POWERUP_DURATIONS = { magnet: 7000, jetpack: 5000, hoverboard: 8000 };
+    this.MAGNET_RADIUS = 150;
 
     // Score & state
     this.score = 0;
@@ -120,6 +138,17 @@ class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.isJumping = false;
     this.isRolling = false;
+
+    // Power-up state flags
+    this.hasMagnet = false;
+    this.isJetpack = false;
+    this.isHoverboard = false;
+
+    // HUD power-up indicator
+    this.powerupText = this.add.text(this.game.config.width - 10, 10, '', {
+      fontSize: '18px',
+      color: '#fff',
+    }).setOrigin(1, 0).setDepth(2);
 
     // Track - tileSprite for endless scroll
     this.track = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'track')
@@ -134,10 +163,12 @@ class GameScene extends Phaser.Scene {
     // Groups
     this.obstacles = this.physics.add.group();
     this.coinsGroup = this.physics.add.group();
+    this.powerupsGroup = this.physics.add.group();
 
     // Collisions
     this.physics.add.overlap(this.player, this.coinsGroup, this.collectCoin, undefined, this);
     this.physics.add.overlap(this.player, this.obstacles, this.handleObstacleCollision, undefined, this);
+    this.physics.add.overlap(this.player, this.powerupsGroup, this.collectPowerup, undefined, this);
 
     // Input
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -169,6 +200,7 @@ class GameScene extends Phaser.Scene {
     // Timers for obstacle and coin spawning
     this.time.addEvent({ delay: 1000, callback: this.spawnObstacle, callbackScope: this, loop: true });
     this.time.addEvent({ delay: 800, callback: this.spawnCoin, callbackScope: this, loop: true });
+    this.time.addEvent({ delay: 6000, callback: this.spawnPowerup, callbackScope: this, loop: true });
   }
 
   update(time, delta) {
@@ -183,6 +215,19 @@ class GameScene extends Phaser.Scene {
     // Move obstacles & coins
     Phaser.Actions.IncY(this.obstacles.getChildren(), this.speed);
     Phaser.Actions.IncY(this.coinsGroup.getChildren(), this.speed);
+    Phaser.Actions.IncY(this.powerupsGroup.getChildren(), this.speed);
+
+    // Magnet effect – attract nearby coins
+    if (this.hasMagnet) {
+      this.coinsGroup.getChildren().forEach((coin) => {
+        const dist = Phaser.Math.Distance.Between(coin.x, coin.y, this.player.x, this.player.y);
+        if (dist < this.MAGNET_RADIUS) {
+          // Lerp coin towards player
+          coin.x = Phaser.Math.Linear(coin.x, this.player.x, 0.08);
+          coin.y = Phaser.Math.Linear(coin.y, this.player.y, 0.08);
+        }
+      });
+    }
 
     // Cleanup off-screen objects
     this.obstacles.getChildren().forEach((obj) => {
@@ -191,6 +236,11 @@ class GameScene extends Phaser.Scene {
       }
     });
     this.coinsGroup.getChildren().forEach((obj) => {
+      if (obj.y > this.game.config.height + 100) {
+        obj.destroy();
+      }
+    });
+    this.powerupsGroup.getChildren().forEach((obj) => {
       if (obj.y > this.game.config.height + 100) {
         obj.destroy();
       }
@@ -211,6 +261,9 @@ class GameScene extends Phaser.Scene {
     this.score += delta * 0.01; // Score based on time survived
     scoreText.textContent = Math.floor(this.score);
     coinsText.textContent = this.coins;
+
+    // Update power-up HUD text with remaining time
+    this.updatePowerupHUD();
   }
 
   switchLane(dir) {
@@ -239,15 +292,82 @@ class GameScene extends Phaser.Scene {
     coin.setCircle(16);
   }
 
+  spawnPowerup() {
+    const lane = Phaser.Math.Between(0, 2);
+    const kinds = ['magnet', 'jetpack', 'hoverboard'];
+    const kind = Phaser.Utils.Array.GetRandom(kinds);
+    const key = {
+      magnet: 'power_magnet',
+      jetpack: 'power_jetpack',
+      hoverboard: 'power_hover',
+    }[kind];
+    const power = this.powerupsGroup.create(this.LANES[lane], -40, key);
+    power.setData('kind', kind);
+  }
+
   collectCoin(player, coin) {
     coin.destroy();
     this.coins += 1;
   }
 
+  collectPowerup(player, power) {
+    const kind = power.getData('kind');
+    power.destroy();
+    this.activatePowerup(kind);
+  }
+
+  activatePowerup(kind) {
+    switch (kind) {
+      case 'magnet':
+        this.hasMagnet = true;
+        this.time.delayedCall(this.POWERUP_DURATIONS.magnet, () => {
+          this.hasMagnet = false;
+        });
+        break;
+      case 'jetpack':
+        if (this.isJetpack) return; // Prevent stacking
+        this.isJetpack = true;
+        const originalY = this.player.y;
+        // Fly up
+        this.tweens.add({
+          targets: this.player,
+          y: 200,
+          duration: 300,
+          ease: 'Quad.easeOut',
+        });
+        this.time.delayedCall(this.POWERUP_DURATIONS.jetpack, () => {
+          // Return to ground
+          this.tweens.add({
+            targets: this.player,
+            y: originalY,
+            duration: 300,
+            ease: 'Quad.easeIn',
+            onComplete: () => {
+              this.isJetpack = false;
+            },
+          });
+        });
+        break;
+      case 'hoverboard':
+        if (this.isHoverboard) return;
+        this.isHoverboard = true;
+        // Visual: tint player
+        this.player.setTint(0x00e676);
+        this.time.delayedCall(this.POWERUP_DURATIONS.hoverboard, () => {
+          this.isHoverboard = false;
+          this.player.clearTint();
+        });
+        break;
+    }
+  }
+
   handleObstacleCollision(player, obstacle) {
+    if ((this.isJetpack || this.isHoverboard)) {
+      return; // Completely invincible
+    }
     const type = obstacle.getData('type') || 'high';
     if ((type === 'low' && this.isJumping) || (type === 'high' && this.isRolling)) {
-      return; // Dodged successfully
+      return; // Dodged
     }
     this.gameOver();
   }
@@ -271,6 +391,7 @@ class GameScene extends Phaser.Scene {
 
   roll() {
     if (this.isRolling || this.isJumping) return;
+    if (this.isJetpack) return; // cannot roll mid-air
     this.isRolling = true;
     this.player.setDisplaySize(50, 40);
     this.player.body.setSize(50, 40);
@@ -297,5 +418,13 @@ class GameScene extends Phaser.Scene {
       finalScoreText.textContent = Math.floor(this.score);
       showScreen(gameOverScreen);
     });
+  }
+
+  updatePowerupHUD() {
+    const active = [];
+    if (this.hasMagnet) active.push('Magnet');
+    if (this.isJetpack) active.push('Jetpack');
+    if (this.isHoverboard) active.push('Hover');
+    this.powerupText.setText(active.join(' | '));
   }
 }
