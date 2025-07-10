@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Subway Surfers - Endless Runner</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen active">
+        <div class="menu-container">
+            <h1 class="game-title">SUBWAY SURFERS</h1>
+            <div class="menu-buttons">
+                <button id="playBtn" class="menu-btn primary">PLAY</button>
+                <button id="charactersBtn" class="menu-btn">CHARACTERS</button>
+                <button id="leaderboardBtn" class="menu-btn">LEADERBOARD</button>
+                <button id="settingsBtn" class="menu-btn">SETTINGS</button>
+            </div>
+        </div>
+        <div class="background-animation"></div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Game HUD -->
+        <div id="gameHUD" class="hud">
+            <div class="hud-top">
+                <div class="score-container">
+                    <span class="label">SCORE</span>
+                    <span id="scoreDisplay">0</span>
+                </div>
+                <div class="coins-container">
+                    <span class="coin-icon">🪙</span>
+                    <span id="coinsDisplay">0</span>
+                </div>
+                <button id="pauseBtn" class="hud-btn">⏸️</button>
+            </div>
+            
+            <!-- Power-up indicators -->
+            <div class="powerup-indicators">
+                <div id="magnetIndicator" class="powerup-indicator hidden">🧲</div>
+                <div id="jetpackIndicator" class="powerup-indicator hidden">🚀</div>
+                <div id="hoverboardIndicator" class="powerup-indicator hidden">🛹</div>
+            </div>
+        </div>
+
+        <!-- Touch Controls (Mobile) -->
+        <div id="touchControls" class="touch-controls">
+            <div class="swipe-area" id="swipeArea">
+                <div class="control-hint">Swipe to move • Tap to jump</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+        <div class="modal">
+            <h2>GAME OVER</h2>
+            <div class="game-over-stats">
+                <div class="stat">
+                    <span class="label">SCORE</span>
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">COINS</span>
+                    <span id="finalCoins">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">BEST</span>
+                    <span id="bestScore">0</span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="restartBtn" class="menu-btn primary">PLAY AGAIN</button>
+                <button id="mainMenuBtn" class="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Character Selection Screen -->
+    <div id="characterScreen" class="screen">
+        <div class="modal">
+            <h2>SELECT CHARACTER</h2>
+            <div class="character-grid">
+                <div class="character-card active" data-character="jake">
+                    <div class="character-preview">👦</div>
+                    <span class="character-name">Jake</span>
+                    <span class="character-status">FREE</span>
+                </div>
+                <div class="character-card" data-character="tricky">
+                    <div class="character-preview">👧</div>
+                    <span class="character-name">Tricky</span>
+                    <span class="character-status">500 🪙</span>
+                </div>
+                <div class="character-card" data-character="fresh">
+                    <div class="character-preview">🧑‍🎤</div>
+                    <span class="character-name">Fresh</span>
+                    <span class="character-status">1000 🪙</span>
+                </div>
+            </div>
+            <button id="characterBackBtn" class="menu-btn">BACK</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboardScreen" class="screen">
+        <div class="modal">
+            <h2>LEADERBOARD</h2>
+            <div id="leaderboardList" class="leaderboard-list">
+                <!-- Populated by JavaScript -->
+            </div>
+            <button id="leaderboardBackBtn" class="menu-btn">BACK</button>
+        </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settingsScreen" class="screen">
+        <div class="modal">
+            <h2>SETTINGS</h2>
+            <div class="settings-options">
+                <div class="setting-item">
+                    <span>Sound Effects</span>
+                    <input type="checkbox" id="soundToggle" checked>
+                </div>
+                <div class="setting-item">
+                    <span>Music</span>
+                    <input type="checkbox" id="musicToggle" checked>
+                </div>
+                <div class="setting-item">
+                    <span>Difficulty</span>
+                    <select id="difficultySelect">
+                        <option value="easy">Easy</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+            <button id="settingsBackBtn" class="menu-btn">BACK</button>
+        </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pauseMenu" class="screen">
+        <div class="modal">
+            <h2>PAUSED</h2>
+            <div class="pause-buttons">
+                <button id="resumeBtn" class="menu-btn primary">RESUME</button>
+                <button id="pauseMainMenuBtn" class="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/utils.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/powerups.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
