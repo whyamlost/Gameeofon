@@ -81,6 +81,27 @@ class GameScene extends Phaser.Scene {
     graphics.generateTexture('track', 64, 64);
     graphics.clear();
 
+    // Parallax background textures
+    // Far skyline (darker)
+    graphics.fillStyle(0x1a1a1a, 1);
+    graphics.fillRect(0, 0, 64, 64);
+    graphics.fillStyle(0x262626, 1);
+    graphics.fillRect(10, 32, 12, 32);
+    graphics.fillRect(30, 20, 16, 44);
+    graphics.fillRect(50, 40, 10, 24);
+    graphics.generateTexture('bg_far', 64, 64);
+    graphics.clear();
+
+    // Mid skyline (slightly lighter)
+    graphics.fillStyle(0x2d2d2d, 1);
+    graphics.fillRect(0, 0, 64, 64);
+    graphics.fillStyle(0x3a3a3a, 1);
+    graphics.fillRect(5, 28, 14, 36);
+    graphics.fillRect(25, 40, 20, 24);
+    graphics.fillRect(50, 26, 12, 38);
+    graphics.generateTexture('bg_mid', 64, 64);
+    graphics.clear();
+
     // Player texture
     graphics.fillStyle(0x00ff00, 1);
     graphics.fillRect(0, 0, 50, 80);
@@ -151,8 +172,13 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(1, 0).setDepth(2);
 
     // Track - tileSprite for endless scroll
+    this.bgFar = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'bg_far')
+      .setOrigin(0, 0).setDepth(-3);
+    this.bgMid = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'bg_mid')
+      .setOrigin(0, 0).setDepth(-2);
+
     this.track = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'track')
-      .setOrigin(0, 0);
+      .setOrigin(0, 0).setDepth(-1);
 
     // Player
     this.currentLane = 1; // start center
@@ -207,6 +233,8 @@ class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
 
     // Scroll track
+    this.bgFar.tilePositionY += this.speed * 0.2;
+    this.bgMid.tilePositionY += this.speed * 0.5;
     this.track.tilePositionY += this.speed;
 
     // Increase speed gradually
