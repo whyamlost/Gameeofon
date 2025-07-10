@@ -1,0 +1,197 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Screen Management */
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    z-index: 10;
+}
+
+.screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Typography */
+h1, h2 {
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Buttons */
+.menu-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    margin: 10px;
+    border-radius: 50px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    min-width: 200px;
+}
+
+.menu-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.menu-btn.primary {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.menu-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Modals */
+.modal {
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+/* Main Menu Specific */
+.menu-container {
+    z-index: 20;
+    position: relative;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="subway" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="%23667eea" opacity="0.1"/><rect x="0" y="0" width="10" height="10" fill="%23ff6b6b" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23subway)"/></svg>') repeat;
+    animation: backgroundMove 20s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes backgroundMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100px); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 2.5rem;
+    }
+    
+    .menu-btn {
+        font-size: 1rem;
+        padding: 12px 25px;
+        min-width: 180px;
+    }
+    
+    .modal {
+        padding: 25px;
+        margin: 20px;
+    }
+    
+    .modal h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 2rem;
+    }
+    
+    .menu-btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+        min-width: 160px;
+    }
+    
+    .modal {
+        padding: 20px;
+        margin: 10px;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #5a6fd8, #6a4190);
+}
