@@ -92,6 +92,10 @@ class GameScene extends Phaser.Scene {
     graphics.fillRect(0, 0, 50, 80);
     graphics.generateTexture('obstacle', 50, 80);
     graphics.clear();
+    graphics.fillStyle(0xffa500, 1);
+    graphics.fillRect(0, 0, 50, 40);
+    graphics.generateTexture('obstacle_low', 50, 40);
+    graphics.clear();
 
     // Coin texture
     graphics.fillStyle(0xffff00, 1);
@@ -105,12 +109,17 @@ class GameScene extends Phaser.Scene {
     this.SPEED_START = 4;
     this.SPEED_INCREMENT = 0.0005; // Speed increases each frame
     this.LANES = [this.game.config.width / 2 - 80, this.game.config.width / 2, this.game.config.width / 2 + 80];
+    this.JUMP_HEIGHT = 120;
+    this.JUMP_DURATION = 600;
+    this.ROLL_DURATION = 500;
 
     // Score & state
     this.score = 0;
     this.coins = 0;
     this.speed = this.SPEED_START;
     this.isGameOver = false;
+    this.isJumping = false;
+    this.isRolling = false;
 
     // Track - tileSprite for endless scroll
     this.track = this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'track')
@@ -128,7 +137,7 @@ class GameScene extends Phaser.Scene {
 
     // Collisions
     this.physics.add.overlap(this.player, this.coinsGroup, this.collectCoin, undefined, this);
-    this.physics.add.collider(this.player, this.obstacles, this.gameOver, undefined, this);
+    this.physics.add.overlap(this.player, this.obstacles, this.handleObstacleCollision, undefined, this);
 
     // Input
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -149,8 +158,11 @@ class GameScene extends Phaser.Scene {
           this.switchLane(-1);
         }
       } else {
-        // Vertical swipe (for jump/slide in future)
-        // Placeholder
+        if (dy < -30) {
+          this.jump();
+        } else if (dy > 30) {
+          this.roll();
+        }
       }
     });
 
@@ -189,6 +201,10 @@ class GameScene extends Phaser.Scene {
       this.switchLane(-1);
     } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
       this.switchLane(1);
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+      this.jump();
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
+      this.roll();
     }
 
     // Update score
@@ -209,8 +225,12 @@ class GameScene extends Phaser.Scene {
 
   spawnObstacle() {
     const lane = Phaser.Math.Between(0, 2);
-    const obstacle = this.obstacles.create(this.LANES[lane], -50, 'obstacle');
+    const type = Math.random() < 0.5 ? 'low' : 'high';
+    const key = type === 'low' ? 'obstacle_low' : 'obstacle';
+    const y = type === 'low' ? -30 : -50;
+    const obstacle = this.obstacles.create(this.LANES[lane], y, key);
     obstacle.setImmovable(true);
+    obstacle.setData('type', type);
   }
 
   spawnCoin() {
@@ -222,6 +242,45 @@ class GameScene extends Phaser.Scene {
   collectCoin(player, coin) {
     coin.destroy();
     this.coins += 1;
+  }
+
+  handleObstacleCollision(player, obstacle) {
+    const type = obstacle.getData('type') || 'high';
+    if ((type === 'low' && this.isJumping) || (type === 'high' && this.isRolling)) {
+      return; // Dodged successfully
+    }
+    this.gameOver();
+  }
+
+  jump() {
+    if (this.isJumping || this.isRolling) return;
+    this.isJumping = true;
+    const originalY = this.player.y;
+    this.tweens.add({
+      targets: this.player,
+      y: originalY - this.JUMP_HEIGHT,
+      duration: this.JUMP_DURATION / 2,
+      ease: 'Quad.easeOut',
+      yoyo: true,
+      onComplete: () => {
+        this.isJumping = false;
+        this.player.y = originalY;
+      },
+    });
+  }
+
+  roll() {
+    if (this.isRolling || this.isJumping) return;
+    this.isRolling = true;
+    this.player.setDisplaySize(50, 40);
+    this.player.body.setSize(50, 40);
+    this.player.y += 20;
+    this.time.delayedCall(this.ROLL_DURATION, () => {
+      this.player.setDisplaySize(50, 80);
+      this.player.body.setSize(50, 80);
+      this.player.y -= 20;
+      this.isRolling = false;
+    });
   }
 
   gameOver() {
