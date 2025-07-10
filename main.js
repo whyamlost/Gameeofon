@@ -3,9 +3,15 @@
 const homeScreen = document.getElementById('home-screen');
 const gameContainer = document.getElementById('game-container');
 const gameOverScreen = document.getElementById('game-over');
+const charactersScreen = document.getElementById('characters-screen');
+const skinsContainer = document.getElementById('skins-container');
+const totalCoinsSpan = document.getElementById('total-coins');
+
 const playBtn = document.getElementById('play-btn');
 const restartBtn = document.getElementById('restart-btn');
 const menuBtn = document.getElementById('menu-btn');
+const charactersBtn = document.getElementById('characters-btn');
+const charBackBtn = document.getElementById('char-back-btn');
 const scoreText = document.getElementById('score');
 const coinsText = document.getElementById('coins');
 const finalScoreText = document.getElementById('final-score');
@@ -17,6 +23,7 @@ function showScreen(screen) {
   homeScreen.classList.remove('active');
   gameContainer.classList.remove('active');
   gameOverScreen.classList.remove('active');
+  charactersScreen.classList.remove('active');
   screen.classList.add('active');
 }
 
@@ -38,6 +45,99 @@ restartBtn.addEventListener('click', () => {
 menuBtn.addEventListener('click', () => {
   showScreen(homeScreen);
 });
+
+charactersBtn.addEventListener('click', () => {
+  buildCharacterScreen();
+  showScreen(charactersScreen);
+});
+
+charBackBtn.addEventListener('click', () => {
+  showScreen(homeScreen);
+});
+
+function getTotalCoins() {
+  return Number(localStorage.getItem('totalCoins') || 0);
+}
+
+function addCoins(amount) {
+  const total = getTotalCoins() + amount;
+  localStorage.setItem('totalCoins', total);
+}
+
+function getUnlockedSkins() {
+  const raw = localStorage.getItem('unlockedSkins');
+  if (raw) return JSON.parse(raw);
+  // Ensure default skin unlocked
+  const defaultArr = ['green'];
+  localStorage.setItem('unlockedSkins', JSON.stringify(defaultArr));
+  return defaultArr;
+}
+
+function saveUnlockedSkins(arr) {
+  localStorage.setItem('unlockedSkins', JSON.stringify(arr));
+}
+
+function getSelectedSkin() {
+  return localStorage.getItem('selectedSkin') || 'green';
+}
+
+function setSelectedSkin(key) {
+  localStorage.setItem('selectedSkin', key);
+}
+
+function buildCharacterScreen() {
+  skinsContainer.innerHTML = '';
+  const unlocked = getUnlockedSkins();
+  const totalCoins = getTotalCoins();
+  totalCoinsSpan.textContent = totalCoins;
+
+  SKINS.forEach((skin) => {
+    const card = document.createElement('div');
+    card.className = 'skin-card';
+
+    const sample = document.createElement('div');
+    sample.className = 'skin-sample';
+    sample.style.background = `#${Phaser.Display.Color.IntegerToColor(skin.color).color.toString(16).padStart(6, '0')}`;
+    card.appendChild(sample);
+
+    const label = document.createElement('div');
+    label.textContent = skin.key.toUpperCase();
+    card.appendChild(label);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn small';
+
+    const selectedSkin = getSelectedSkin();
+    if (unlocked.includes(skin.key)) {
+      if (skin.key === selectedSkin) {
+        btn.textContent = 'Selected';
+        btn.disabled = true;
+      } else {
+        btn.textContent = 'Select';
+        btn.addEventListener('click', () => {
+          setSelectedSkin(skin.key);
+          buildCharacterScreen();
+        });
+      }
+    } else {
+      btn.textContent = `Unlock (${skin.cost})`;
+      btn.disabled = totalCoins < skin.cost;
+      btn.addEventListener('click', () => {
+        const currentCoins = getTotalCoins();
+        if (currentCoins >= skin.cost) {
+          addCoins(-skin.cost);
+          const newUnlocked = [...unlocked, skin.key];
+          saveUnlockedSkins(newUnlocked);
+          setSelectedSkin(skin.key);
+          buildCharacterScreen();
+        }
+      });
+    }
+
+    card.appendChild(btn);
+    skinsContainer.appendChild(card);
+  });
+}
 
 function initGame() {
   const width = 480;
@@ -102,11 +202,13 @@ class GameScene extends Phaser.Scene {
     graphics.generateTexture('bg_mid', 64, 64);
     graphics.clear();
 
-    // Player texture
-    graphics.fillStyle(0x00ff00, 1);
-    graphics.fillRect(0, 0, 50, 80);
-    graphics.generateTexture('player', 50, 80);
-    graphics.clear();
+    // Player texture generation (skins)
+    SKINS.forEach((s) => {
+      graphics.fillStyle(s.color, 1);
+      graphics.fillRect(0, 0, 50, 80);
+      graphics.generateTexture(`player_${s.key}`, 50, 80);
+      graphics.clear();
+    });
 
     // Obstacle texture
     graphics.fillStyle(0xff0000, 1);
@@ -182,7 +284,8 @@ class GameScene extends Phaser.Scene {
 
     // Player
     this.currentLane = 1; // start center
-    this.player = this.physics.add.sprite(this.LANES[this.currentLane], this.game.config.height - 100, 'player');
+    this.skin = getSelectedSkin();
+    this.player = this.physics.add.sprite(this.LANES[this.currentLane], this.game.config.height - 100, `player_${this.skin}`);
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(1);
 
@@ -336,6 +439,7 @@ class GameScene extends Phaser.Scene {
   collectCoin(player, coin) {
     coin.destroy();
     this.coins += 1;
+    addCoins(1);
   }
 
   collectPowerup(player, power) {
