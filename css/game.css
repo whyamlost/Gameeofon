@@ -1,0 +1,274 @@
+/* Game Screen Layout */
+#gameScreen {
+    background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 50%, #333 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Game Canvas */
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, 
+        #87CEEB 0%,   /* Sky blue */
+        #98FB98 30%,  /* Light green */
+        #696969 70%,  /* Gray for tracks */
+        #333 100%     /* Dark for underground */
+    );
+    z-index: 1;
+}
+
+/* Game HUD */
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    pointer-events: none;
+}
+
+.score-container, .coins-container {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.score-container .label, .coins-container .label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: block;
+    margin-bottom: 2px;
+}
+
+#scoreDisplay, #coinsDisplay {
+    font-size: 1.5rem;
+    color: #feca57;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.coin-icon {
+    font-size: 1.2rem;
+    margin-right: 8px;
+}
+
+.hud-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.hud-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Power-up Indicators */
+.powerup-indicators {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.powerup-indicator {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 3px solid #feca57;
+    animation: powerupPulse 1s infinite;
+    backdrop-filter: blur(10px);
+}
+
+.powerup-indicator.hidden {
+    display: none;
+}
+
+@keyframes powerupPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Touch Controls */
+.touch-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    z-index: 50;
+    pointer-events: all;
+}
+
+.swipe-area {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 30px;
+}
+
+.control-hint {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 16px;
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    animation: fadeInOut 3s infinite;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Game Elements Visual Effects */
+.coin-collect-effect {
+    position: absolute;
+    color: #feca57;
+    font-size: 2rem;
+    font-weight: bold;
+    pointer-events: none;
+    animation: coinCollect 1s ease-out forwards;
+    z-index: 200;
+}
+
+@keyframes coinCollect {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5) translateY(-50px);
+        opacity: 0;
+    }
+}
+
+.speed-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        rgba(255, 255, 255, 0.1) 5px,
+        rgba(255, 255, 255, 0.1) 10px
+    );
+    animation: speedLines 0.2s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.speed-lines.active {
+    opacity: 1;
+}
+
+@keyframes speedLines {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-20px); }
+}
+
+/* Responsive Adjustments for Game */
+@media (max-width: 768px) {
+    .hud-top {
+        padding: 15px;
+    }
+    
+    .score-container, .coins-container {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    
+    #scoreDisplay, #coinsDisplay {
+        font-size: 1.3rem;
+    }
+    
+    .hud-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+    }
+    
+    .powerup-indicators {
+        top: 80px;
+        right: 15px;
+    }
+    
+    .powerup-indicator {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+    
+    .touch-controls {
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hud-top {
+        padding: 10px;
+    }
+    
+    .score-container, .coins-container {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    #scoreDisplay, #coinsDisplay {
+        font-size: 1.1rem;
+    }
+    
+    .hud-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .powerup-indicator {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
