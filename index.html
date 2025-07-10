@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subway Surfers Clone</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Phaser 3 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+</head>
+<body>
+  <!-- Home Screen -->
+  <div id="home-screen" class="screen active">
+    <h1>Runner Rush</h1>
+    <button id="play-btn" class="btn">Play</button>
+    <button id="leaderboard-btn" class="btn">Leaderboard</button>
+    <button id="characters-btn" class="btn">Characters</button>
+    <button id="settings-btn" class="btn">Settings</button>
+  </div>
+
+  <!-- Canvas/Game Container -->
+  <div id="game-container" class="screen">
+    <div id="hud">
+      <div id="score">0</div>
+      <div id="coins">0</div>
+      <button id="pause-btn" class="btn small">II</button>
+    </div>
+    <!-- The canvas will be injected by Phaser -->
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over" class="screen">
+    <h2>Game Over</h2>
+    <p>Your Score: <span id="final-score">0</span></p>
+    <button id="restart-btn" class="btn">Restart</button>
+    <button id="menu-btn" class="btn">Main Menu</button>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
