@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subway Runner - Endless Adventure</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="screen">
+        <div class="loading-content">
+            <h1>SUBWAY RUNNER</h1>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen">
+        <div class="menu-content">
+            <h1 class="game-title">SUBWAY RUNNER</h1>
+            <div class="menu-buttons">
+                <button id="playBtn" class="menu-btn">PLAY</button>
+                <button id="charactersBtn" class="menu-btn">CHARACTERS</button>
+                <button id="leaderboardBtn" class="menu-btn">LEADERBOARD</button>
+                <button id="settingsBtn" class="menu-btn">SETTINGS</button>
+            </div>
+            <div class="high-score">
+                <p>High Score: <span id="highScoreDisplay">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Character Selection Screen -->
+    <div id="characterSelect" class="screen hidden">
+        <div class="character-content">
+            <h2>SELECT CHARACTER</h2>
+            <div class="character-grid">
+                <div class="character-card selected" data-character="default">
+                    <div class="character-sprite default-char"></div>
+                    <h3>Runner</h3>
+                    <p>Unlocked</p>
+                </div>
+                <div class="character-card locked" data-character="ninja">
+                    <div class="character-sprite ninja-char"></div>
+                    <h3>Ninja</h3>
+                    <p>1000 coins</p>
+                </div>
+                <div class="character-card locked" data-character="robot">
+                    <div class="character-sprite robot-char"></div>
+                    <h3>Robot</h3>
+                    <p>2500 coins</p>
+                </div>
+                <div class="character-card locked" data-character="alien">
+                    <div class="character-sprite alien-char"></div>
+                    <h3>Alien</h3>
+                    <p>5000 coins</p>
+                </div>
+            </div>
+            <button id="backToMenuBtn" class="menu-btn">BACK TO MENU</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard" class="screen hidden">
+        <div class="leaderboard-content">
+            <h2>LEADERBOARD</h2>
+            <div class="score-list">
+                <div class="score-header">
+                    <span>Rank</span>
+                    <span>Score</span>
+                    <span>Date</span>
+                </div>
+                <div id="scoreEntries"></div>
+            </div>
+            <button id="backToMenuFromLeaderboard" class="menu-btn">BACK TO MENU</button>
+        </div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings" class="screen hidden">
+        <div class="settings-content">
+            <h2>SETTINGS</h2>
+            <div class="setting-item">
+                <label for="soundToggle">Sound Effects</label>
+                <input type="checkbox" id="soundToggle" checked>
+            </div>
+            <div class="setting-item">
+                <label for="musicToggle">Background Music</label>
+                <input type="checkbox" id="musicToggle" checked>
+            </div>
+            <div class="setting-item">
+                <label for="difficultySelect">Difficulty</label>
+                <select id="difficultySelect">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <button id="backToMenuFromSettings" class="menu-btn">BACK TO MENU</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen hidden">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Game HUD -->
+        <div class="game-hud">
+            <div class="hud-top">
+                <div class="score-display">
+                    <span>Score: <span id="currentScore">0</span></span>
+                </div>
+                <div class="coin-display">
+                    <span>Coins: <span id="currentCoins">0</span></span>
+                </div>
+            </div>
+            <div class="hud-bottom">
+                <button id="pauseBtn" class="hud-btn">⏸️</button>
+                <div class="power-up-indicator">
+                    <div id="magnetIndicator" class="power-up-icon hidden">🧲</div>
+                    <div id="jetpackIndicator" class="power-up-icon hidden">🚀</div>
+                    <div id="hoverboardIndicator" class="power-up-icon hidden">🛹</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="pause-overlay hidden">
+            <div class="pause-content">
+                <h2>PAUSED</h2>
+                <button id="resumeBtn" class="menu-btn">RESUME</button>
+                <button id="restartBtn" class="menu-btn">RESTART</button>
+                <button id="quitBtn" class="menu-btn">QUIT TO MENU</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOver" class="game-over-overlay hidden">
+            <div class="game-over-content">
+                <h2>GAME OVER</h2>
+                <div class="final-stats">
+                    <p>Final Score: <span id="finalScore">0</span></p>
+                    <p>Coins Collected: <span id="finalCoins">0</span></p>
+                    <p>Distance: <span id="finalDistance">0</span>m</p>
+                </div>
+                <div class="game-over-buttons">
+                    <button id="playAgainBtn" class="menu-btn">PLAY AGAIN</button>
+                    <button id="backToMenuFromGame" class="menu-btn">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Rewards Popup -->
+    <div id="dailyRewards" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>DAILY REWARD!</h2>
+            <div class="reward-display">
+                <div class="reward-icon">🪙</div>
+                <p>You earned <span id="rewardAmount">100</span> coins!</p>
+            </div>
+            <button id="claimRewardBtn" class="menu-btn">CLAIM</button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop>
+        <source src="assets/audio/background-music.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="coinSound">
+        <source src="assets/audio/coin.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="jumpSound">
+        <source src="assets/audio/jump.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="crashSound">
+        <source src="assets/audio/crash.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="powerUpSound">
+        <source src="assets/audio/powerup.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/audio.js"></script>
+</body>
+</html>
